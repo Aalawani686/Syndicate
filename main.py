@@ -6,7 +6,7 @@ import math
 def nothing(x):
     pass
 
-Video_capture = cv2.VideoCapture(1)
+Video_capture = cv2.VideoCapture(0)
 horizCenter = 320
 vertiCenter = 240
 targetWidth = 6
@@ -27,16 +27,22 @@ sh='Saturation High'
 sl='Saturation Low'
 vh='Value High'
 vl='Value Low'
+size="Size of contour"
+minW="Thresh Low"
+maxW="Thresh High"
 
 cv2.namedWindow('Threshed', cv2.WINDOW_AUTOSIZE)
 cv2.namedWindow("Live Feed", cv2.WINDOW_AUTOSIZE)
 cv2.namedWindow('Contours', cv2.WINDOW_AUTOSIZE)
+'''cv2.createTrackbar(minW, 'Threshed',0,255,nothing)
+cv2.createTrackbar(maxW, 'Threshed',0,255,nothing)'''
 cv2.createTrackbar(hl, 'Threshed',0,179,nothing)
 cv2.createTrackbar(hh, 'Threshed',0,179,nothing)
 cv2.createTrackbar(sl, 'Threshed',0,255,nothing)
 cv2.createTrackbar(sh, 'Threshed',0,255,nothing)
 cv2.createTrackbar(vl, 'Threshed',0,255,nothing)
 cv2.createTrackbar(vh, 'Threshed',0,255,nothing)
+cv2.createTrackbar(size, 'Threshed',0,5000,nothing)
 
 
 def angle(p1, p2, p0):
@@ -68,19 +74,29 @@ def processing(imageTarWidth, rectCenterX, rectCenterY):
 
 while(True):
 
+        #frame = cv2.imread('text.png',-1)
         ret,frame = Video_capture.read()
+
+
         horizCenter = np.size(frame, 0)/2
         verticenter = np.size(frame, 1)/2
 
+        s=cv2.getTrackbarPos(size, 'Threshed')
+        win = cv2.getTrackbarPos(minW, 'Threshed')
+        wax = cv2.getTrackbarPos(maxW, 'Threshed')
         minHue=cv2.getTrackbarPos(hl, 'Threshed')
         maxHue=cv2.getTrackbarPos(hh, 'Threshed')
         minSat=cv2.getTrackbarPos(sl, 'Threshed')
         maxSat=cv2.getTrackbarPos(sh, 'Threshed')
         minVal=cv2.getTrackbarPos(vl, 'Threshed')
         maxVal=cv2.getTrackbarPos(vh, 'Threshed')
-        ret,frame = Video_capture.read()
+
 
         hsv_img = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        '''THRESHOLD_MIN = np.array([minHue, minSat, minVal],np.uint8)
+        THRESHOLD_MAX = np.array([maxHue, maxSat, maxVal],np.uint8)'''
 
         THRESHOLD_MIN = np.array([minHue, minSat, minVal],np.uint8)
         THRESHOLD_MAX = np.array([maxHue, maxSat, maxVal],np.uint8)
@@ -110,7 +126,7 @@ while(True):
             epsilon = 0.01*cv2.arcLength(cont, True)
             approx = cv2.approxPolyDP(cont, epsilon, True)
 
-            if cv2.contourArea(approx) > 10000 and len(approx) == 4:
+            if cv2.contourArea(approx) > s and len(approx) == 4:
                 #print (len(approx))
                 #print (cv2.contourArea(approx))
 
